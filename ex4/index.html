@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    
+    <script>
+        function tree(n){
+            printTreeTop(n);
+            printTreeBottom(n);
+        }
+
+        function printTreeTop(n){
+            for(let j = n, i = 1; j >= 0; j--, i += 2){
+                console.log(repeatchar(j, ' ') + repeatchar(i, '*'));
+            }
+        }
+
+        function printTreeBottom(n){
+            for(let i = 0; i < n; i++){
+                console.log(repeatchar(n, ' ') + '*');
+            }
+        }
+
+        function repeatchar(n, arg_char){
+            let str = '';
+            for(let i = 0; i < n; i++){
+                str += arg_char;
+            }
+            return str;
+        }
+    </script>
+
+</body>
+
+</html>
