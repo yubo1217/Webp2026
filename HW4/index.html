@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #ddd;
+      padding: 6px;
+    }
+
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    tr:hover { background-color: #ddd; }
+
+    th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #04AA6D;
+      color: white;
+    }
+
+    .pagination {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination button {
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    景點觀光展覽資訊
+    <input type="text" id="search" placeholder="搜尋名稱">
+  </h1>
+  <table id="csie">
+    <tr>
+      <th>名稱</th>
+      <th>地點</th>
+      <th>票價</th>
+    </tr>
+  </table>
+  <div class="pagination">
+    <button onclick="prevPage()">上一頁</button>
+    <span id="pageInfo">1 / 1 頁</span>
+    <button onclick="nextPage()">下一頁</button>
+  </div>
+
+  <script>
+    var dataset = [];
+    var filteredData = [];
+    var currentPage = 1;
+    var itemsPerPage = 10;
+
+    var openUrl =
+      "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=6";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', openUrl, true);
+    xhr.send();
+    xhr.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        dataset = JSON.parse(this.responseText);
+        filteredData = dataset;
+        renderTable();
+      }
+    };
+
+    document.getElementById('search').onchange = function () {
+      var keyword = this.value;
+      if (keyword === '') {
+        filteredData = dataset;
+      } else {
+        filteredData = dataset.filter(function (data) {
+          return data['title'].indexOf(keyword) !== -1;
+        });
+      }
+      currentPage = 1;
+      renderTable();
+    };
+
+    function renderTable() {
+      var myTable = document.getElementById("csie");
+      while (myTable.rows.length > 1) {
+        myTable.deleteRow(1);
+      }
+
+      var totalPages = Math.ceil(filteredData.length / itemsPerPage);
+      if (totalPages === 0) totalPages = 1;
+
+      var start = (currentPage - 1) * itemsPerPage;
+      var end = Math.min(start + itemsPerPage, filteredData.length);
+
+      for (var i = start; i < end; i++) {
+        var data = filteredData[i];
+        var row = myTable.insertRow(-1);
+        row.insertCell(0).innerHTML = data['title'];
+        row.insertCell(1).innerHTML = data['showInfo'][0]['location'];
+        row.insertCell(2).innerHTML = data['showInfo'][0]['price'];
+      }
+
+      document.getElementById('pageInfo').innerHTML =
+        currentPage + ' / ' + totalPages + ' 頁';
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function nextPage() {
+      var totalPages = Math.ceil(filteredData.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+  </script>
+</body>
+</html>
